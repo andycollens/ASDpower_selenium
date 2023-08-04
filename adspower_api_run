@@ -1,0 +1,35 @@
+#This code starts an ADSpower profile and allows it to be managed by chromedriver 
+
+import requests
+import time
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+import sys
+from selenium.webdriver.common.by import By
+import pyperclip
+
+ads_id = "your_id"
+open_url = "http://local.adspower.net:50325/api/v1/browser/start?user_id=" + ads_id
+close_url = "http://local.adspower.net:50325/api/v1/browser/stop?user_id=" + ads_id
+
+resp = requests.get(open_url).json()
+if resp["code"] != 0:
+    print(resp["msg"])
+    print("please check ads_id")
+    sys.exit()
+debport = resp["data"]["debug_port"]
+debaddress = "localhost:" + debport
+service = Service(executable_path=resp["data"]["webdriver"])
+chrome_options = Options()
+chrome_options.add_experimental_option("debuggerAddress", debaddress)
+driver = webdriver.Chrome(service=service, options=chrome_options)
+print(driver.title)
+
+
+driver.get("https://google.com")
+time.sleep(2)
+
+
+driver.quit()
+requests.get(close_url)
